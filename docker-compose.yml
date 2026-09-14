@@ -1,0 +1,35 @@
+version: "3.8"
+
+# Quick local/demo deployment. For a closer-to-production setup, point
+# DB_URL/DB_DRIVER at a real Postgres instance (see backend/README section
+# "Switching to Postgres") instead of the bundled H2 file database.
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    environment:
+      JWT_SECRET: ${JWT_SECRET:-change-this-super-secret-key-in-production-please-0123456789}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@studycompanion.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-ChangeMe123!}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:8081}
+      AI_MOCK_MODE: ${AI_MOCK_MODE:-true}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-sonnet-4-6}
+    volumes:
+      - backend-data:/app/data
+      - backend-uploads:/app/uploads
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend
+
+volumes:
+  backend-data:
+  backend-uploads:
